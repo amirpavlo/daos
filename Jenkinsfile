@@ -38,7 +38,7 @@
  */
 // To use a test branch (i.e. PR) until it lands to master
 // I.e. for testing library changes
-@Library(value="pipeline-lib@fix_tee_pipe") _
+//@Library(value="pipeline-lib@your_branch") _
 
 def arch=""
 def sanitized_JOB_NAME = JOB_NAME.toLowerCase().replaceAll('/', '-').replaceAll('%2f', '-')
@@ -88,11 +88,13 @@ pipeline {
                         }
                     }
                     steps {
+                        /*
                         sh '''set -x
                               git fetch --no-tags --progress https://github.com/daos-stack/daos.git +refs/heads/master:refs/remotes/origin/master
                               git checkout -f origin/master
                               git submodule init
                               git submodule update -f'''
+                        */
                         sconsBuild clean: "_build.external${arch}",
                                    scm: [url: 'https://github.com/daos-stack/daos.git',
                                          branch: "master"],
@@ -187,11 +189,16 @@ pipeline {
                         provisionNodes NODELIST: env.NODELIST,
                                        node_count: 1,
                                        snapshot: true
+                        /*
                         sh '''set -x
                               git fetch --no-tags --progress https://github.com/daos-stack/daos.git +refs/heads/master:refs/remotes/origin/master
                               git checkout -f origin/master
                               git submodule init
                               git submodule update -f'''
+                        */
+                        checkoutScm url: 'https://github.com/daos-stack/daos.git',
+                                    branch: "master",
+                                    withSubmodules: true
                         runTest stashes: [ 'CentOS-tests', 'CentOS-install', 'CentOS-build-vars' ],
                                 script: '''export PDSH_SSH_ARGS_APPEND="-i ci_key"
                                            # JENKINS-52781 tar function is breaking symlinks
@@ -281,11 +288,16 @@ pipeline {
                         provisionNodes NODELIST: env.NODELIST,
                                        node_count: 9,
                                        snapshot: true
+                        /*
                         sh '''set -x
                               git fetch --no-tags --progress https://github.com/daos-stack/daos.git +refs/heads/master:refs/remotes/origin/master
                               git checkout -f origin/master
                               git submodule init
                               git submodule update -f'''
+                        */
+                        checkoutScm url: 'https://github.com/daos-stack/daos.git',
+                                    branch: "master",
+                                    withSubmodules: true
                         runTest stashes: [ 'CentOS-install', 'CentOS-build-vars' ],
                                 script: '''export PDSH_SSH_ARGS_APPEND="-i ci_key"
                                            test_tag=$(git show -s --format=%B | sed -ne "/^Test-tag:/s/^.*: *//p")
