@@ -26,6 +26,7 @@
 #include <daos/pool.h>
 #include <daos/task.h>
 #include <daos_mgmt.h>
+#include <daos_security.h>
 #include "client_internal.h"
 #include "task_internal.h"
 
@@ -101,6 +102,8 @@ daos_pool_create(uint32_t mode, uid_t uid, gid_t gid, const char *grp,
 	daos_pool_create_t	*args;
 	tse_task_t		*task;
 	int			 rc;
+	char			*owner;
+	char			*owner_grp;
 
 	DAOS_API_ARG_ASSERT(*args, POOL_CREATE);
 	if (!valid_pool_create_mode(mode)) {
@@ -112,14 +115,28 @@ daos_pool_create(uint32_t mode, uid_t uid, gid_t gid, const char *grp,
 		return -DER_INVAL;
 	}
 
+	/*
+	 * TODO: Remove when client API passes in owner/owner-group as strings
+	 */
+	rc = daos_acl_uid_to_principal(uid, &owner);
+	if (rc) {
+		D_ERROR("Invalid uid\n");
+		return rc;
+	}
+
+	rc = daos_acl_gid_to_principal(gid, &owner_grp);
+	if (rc) {
+		D_ERROR("Invalid gid\n");
+		D_GOTO(out, rc);
+	}
+
 	rc = dc_task_create(dc_pool_create, NULL, ev, &task);
 	if (rc)
 		return rc;
 
 	args = dc_task_get_args(task);
-	args->mode	= mode;
-	args->uid	= uid;
-	args->gid	= gid;
+	args->owner	= owner;
+	args->owner_grp	= owner_grp;
 	args->grp	= grp;
 	args->tgts	= tgts;
 	args->dev	= dev;
@@ -129,7 +146,12 @@ daos_pool_create(uint32_t mode, uid_t uid, gid_t gid, const char *grp,
 	args->svc	= svc;
 	args->uuid	= uuid;
 
-	return dc_task_schedule(task, true);
+	rc = dc_task_schedule(task, true);
+
+out:
+	D_FREE(owner);
+	D_FREE(owner_grp);
+	return rc;
 }
 
 int
