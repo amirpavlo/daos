@@ -93,13 +93,9 @@ pipeline {
                               git checkout -f origin/master
                               git submodule init
                               git submodule update -f'''
-                        script {
-                            def scmVars = checkout scm
-                            scmVars.branch = "master"
-                        }
-                        println scmVars
                         sconsBuild clean: "_build.external${arch}",
-                                   scm: scmVars,
+                                   scm: [url: 'https://github.com/daos-stack/daos.git',
+                                         branch: "master"],
                                    failure_artifacts: 'config.log-centos7-gcc'
                         stash name: 'CentOS-install', includes: 'install/**'
                         stash name: 'CentOS-build-vars', includes: ".build_vars${arch}.*"
