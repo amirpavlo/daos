@@ -141,8 +141,6 @@ typedef struct {
 } daos_set_params_t;
 
 typedef struct {
-	const char		*owner;
-	const char		*owner_grp;
 	const char		*grp;
 	const d_rank_list_t	*tgts;
 	const char		*dev;

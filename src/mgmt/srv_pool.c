@@ -68,8 +68,7 @@ out_rpc:
 }
 
 static int
-ds_mgmt_pool_svc_create(uuid_t pool_uuid, d_string_t owner,
-			d_string_t owner_group,
+ds_mgmt_pool_svc_create(uuid_t pool_uuid,
 			int ntargets, uuid_t target_uuids[],
 			const char *group, d_rank_list_t *ranks,
 			daos_prop_t *prop, d_rank_list_t *svc_list)
@@ -88,7 +87,7 @@ ds_mgmt_pool_svc_create(uuid_t pool_uuid, d_string_t owner,
 	 * TODO: fetch domain list from external source
 	 * Report 1 domain per target for now
 	 */
-	rc = ds_pool_svc_create(pool_uuid, owner, owner_group, ranks->rl_nr,
+	rc = ds_pool_svc_create(pool_uuid, ranks->rl_nr,
 				target_uuids, group, ranks, ARRAY_SIZE(doms),
 				doms, prop, svc_list);
 
@@ -230,8 +229,7 @@ ds_mgmt_hdlr_pool_create(crt_rpc_t *rpc_req)
 		D_GOTO(tgt_pool_create_fail, rc = -DER_NOMEM);
 	pc_out->pc_svc->rl_nr = pc_in->pc_svc_nr;
 
-	rc = ds_mgmt_pool_svc_create(pc_in->pc_pool_uuid, pc_in->pc_owner,
-				     pc_in->pc_owner_grp,
+	rc = ds_mgmt_pool_svc_create(pc_in->pc_pool_uuid,
 				     ranks_size, tgt_uuids, pc_in->pc_grp,
 				     rank_list, pc_in->pc_prop, pc_out->pc_svc);
 	if (rc)

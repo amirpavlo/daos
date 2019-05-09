@@ -134,8 +134,6 @@ CRT_RPC_DECLARE(pool_op, DAOS_ISEQ_POOL_OP, DAOS_OSEQ_POOL_OP)
 
 #define DAOS_ISEQ_POOL_CREATE	/* input fields */		 \
 	((struct pool_op_in)	(pri_op)		CRT_VAR) \
-	((d_string_t)		(pri_owner)		CRT_VAR) \
-	((d_string_t)		(pri_owner_grp)		CRT_VAR) \
 	((uint32_t)		(pri_ntgts)		CRT_VAR) \
 	((uuid_t)		(pri_tgt_uuids)		CRT_ARRAY) \
 	((d_rank_list_t)	(pri_tgt_ranks)		CRT_PTR) \

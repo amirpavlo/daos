@@ -438,7 +438,6 @@ pool_prop_write(struct rdb_tx *tx, const rdb_path_t *kvs, daos_prop_t *prop)
 
 static int
 init_pool_metadata(struct rdb_tx *tx, const rdb_path_t *kvs,
-		   d_string_t owner, d_string_t owner_group,
 		   uint32_t nnodes, uuid_t target_uuids[], const char *group,
 		   const d_rank_list_t *target_addrs, daos_prop_t *prop,
 		   uint32_t ndomains, const int32_t *domains)
@@ -554,18 +553,6 @@ init_pool_metadata(struct rdb_tx *tx, const rdb_path_t *kvs,
 	if (rc != 0)
 		D_GOTO(out_uuids, rc);
 
-	/* Initialize the ownership properties. */
-	daos_iov_set(&value, owner, strnlen(owner, DAOS_ACL_MAX_PRINCIPAL_LEN));
-	rc = rdb_tx_update(tx, kvs, &ds_pool_prop_owner, &value);
-	if (rc != 0)
-		D_GOTO(out_uuids, rc);
-
-	daos_iov_set(&value, owner_group,
-		     strnlen(owner_group, DAOS_ACL_MAX_PRINCIPAL_LEN));
-	rc = rdb_tx_update(tx, kvs, &ds_pool_prop_owner_group, &value);
-	if (rc != 0)
-		D_GOTO(out_uuids, rc);
-
 out_uuids:
 	D_FREE(uuids);
 out_map_buf:
@@ -653,8 +640,6 @@ get_md_cap(void)
  * target UUIDs returned by the ds_pool_create() calls.
  *
  * \param[in]		pool_uuid	pool UUID
- * \param[in]		owner		User who owns the pool
- * \param[in]		owner_group	Group that owns the pool
  * \param[in]		ntargets	number of targets in the pool
  * \param[in]		target_uuids	array of \a ntargets target UUIDs
  * \param[in]		group		crt group ID (unused now)
@@ -667,8 +652,7 @@ get_md_cap(void)
  *					list of pool service replica ranks
  */
 int
-ds_pool_svc_create(const uuid_t pool_uuid, d_string_t owner,
-		   d_string_t owner_group, int ntargets, uuid_t target_uuids[],
+ds_pool_svc_create(const uuid_t pool_uuid, int ntargets, uuid_t target_uuids[],
 		   const char *group, const d_rank_list_t *target_addrs,
 		   int ndomains, const int *domains, daos_prop_t *prop,
 		   d_rank_list_t *svc_addrs)
@@ -717,8 +701,6 @@ rechoose:
 	in = crt_req_get(rpc);
 	uuid_copy(in->pri_op.pi_uuid, pool_uuid);
 	uuid_clear(in->pri_op.pi_hdl);
-	in->pri_owner = owner;
-	in->pri_owner_grp = owner_group;
 	in->pri_ntgts = ntargets;
 	in->pri_tgt_uuids.ca_count = ntargets;
 	in->pri_tgt_uuids.ca_arrays = target_uuids;
@@ -1572,8 +1554,7 @@ ds_pool_create_handler(crt_rpc_t *rpc)
 	rc = rdb_tx_create_root(&tx, &attr);
 	if (rc != 0)
 		D_GOTO(out_tx, rc);
-	rc = init_pool_metadata(&tx, &svc->ps_root, in->pri_owner,
-				in->pri_owner_grp, in->pri_tgt_uuids.ca_count,
+	rc = init_pool_metadata(&tx, &svc->ps_root, in->pri_tgt_uuids.ca_count,
 				in->pri_tgt_uuids.ca_arrays, NULL /* group */,
 				in->pri_tgt_ranks, prop_dup,
 				in->pri_ndomains, in->pri_domains.ca_arrays);

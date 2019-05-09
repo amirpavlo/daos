@@ -116,7 +116,7 @@ daos_pool_create(uint32_t mode, uid_t uid, gid_t gid, const char *grp,
 	}
 
 	/*
-	 * TODO: Remove when client API passes in owner/owner-group as strings
+	 * TODO: Check if prop contains owner/group. If not, get euid/egid.
 	 */
 	rc = daos_acl_uid_to_principal(uid, &owner);
 	if (rc) {
@@ -130,13 +130,12 @@ daos_pool_create(uint32_t mode, uid_t uid, gid_t gid, const char *grp,
 		D_GOTO(out, rc);
 	}
 
+
 	rc = dc_task_create(dc_pool_create, NULL, ev, &task);
 	if (rc)
 		return rc;
 
 	args = dc_task_get_args(task);
-	args->owner	= owner;
-	args->owner_grp	= owner_grp;
 	args->grp	= grp;
 	args->tgts	= tgts;
 	args->dev	= dev;

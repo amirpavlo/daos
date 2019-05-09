@@ -115,8 +115,6 @@ dc_pool_create(tse_task_t *task)
 
 	/** fill in request buffer */
 	uuid_copy(pc_in->pc_pool_uuid, args->uuid);
-	pc_in->pc_owner = (d_string_t)args->owner;
-	pc_in->pc_owner_grp = (d_string_t)args->owner_grp;
 	pc_in->pc_grp = (d_string_t)args->grp;
 	pc_in->pc_tgt_dev = (d_string_t)args->dev;
 	pc_in->pc_tgts = (d_rank_list_t *)args->tgts;
