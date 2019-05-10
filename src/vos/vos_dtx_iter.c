@@ -52,8 +52,6 @@ dtx_iter_fini(struct vos_iterator *iter)
 	struct vos_dtx_iter	*oiter = iter2oiter(iter);
 	int			 rc = 0;
 
-	D_ASSERT(iter->it_type == VOS_ITER_DTX);
-
 	if (!daos_handle_is_inval(oiter->oit_hdl)) {
 		rc = dbtree_iter_finish(oiter->oit_hdl);
 		if (rc != 0)

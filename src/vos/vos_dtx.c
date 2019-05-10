@@ -1111,6 +1111,7 @@ vos_dtx_check_availability(struct umem_instance *umm, daos_handle_t coh,
 		struct vos_obj_df	*obj;
 
 		obj = umem_off2ptr(umm, record);
+		D_ASSERT(obj != NULL);
 
 		/* I just created (or shared) the object,
 		 * so should be available unless aborted.
